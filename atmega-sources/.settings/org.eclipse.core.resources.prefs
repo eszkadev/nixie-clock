@@ -1,0 +1,9 @@
+eclipse.preferences.version=1
+encoding/<project>=UTF-8
+encoding/ds1307.c=UTF-8
+encoding/ds1307.h=UTF-8
+encoding/main.c=UTF-8
+encoding/twi.h=UTF-8
+encoding/twi_at16.c=UTF-8
+encoding/uart.h=UTF-8
+encoding/uart_at16.c=UTF-8
