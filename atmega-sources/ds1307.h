@@ -23,9 +23,21 @@
 #ifndef DS1307_H_
 #define DS1307_H_
 
+typedef struct ds1307_time_t
+{
+	uint8_t seconds;
+	uint8_t minutes;
+	uint8_t hours;
+	uint8_t day_of_week;
+	uint8_t day;
+	uint8_t month;
+	uint8_t year;
+} ds1307_time_t;
+
 void ds1307_init(void);
 uint8_t ds1307_receive(uint8_t address);
 void ds1307_transmit(uint8_t address, uint8_t value);
 uint8_t ds1307_get_seconds(void);
+ds1307_time_t ds1307_get_time(void);
 
 #endif /* DS1307_H_ */

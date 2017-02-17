@@ -22,6 +22,7 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <stdio.h>
 
 #include "uart.h"
 #include "ds1307.h"
@@ -89,11 +90,12 @@ int main(void)
 			uart_puts((uint8_t*)"\n\r");
 		}
 
-		// read seconds from RTC
-		uint8_t seconds = ds1307_get_seconds();
-		uart_putc(((seconds / 10) % 10) + 48);
-		uart_putc((seconds % 10) + 48);
-		uart_puts((uint8_t*)"\n\r");
+		// read time from RTC
+		ds1307_time_t time = ds1307_get_time();
+		char buf[32];
+
+		sprintf(buf, "%d:%d:%d\n\r", time.hours, time.minutes, time.seconds);
+		uart_puts((uint8_t*)buf);
 		_delay_ms(10);
 	}
 
