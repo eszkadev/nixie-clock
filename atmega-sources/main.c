@@ -77,6 +77,9 @@ inline void time_setup(void)
 	}
 	while(i < BUFFER_SIZE);
 
+	if(i < BUFFER_SIZE)
+		buf[i] = 0;
+
 	ds1307_time_t new_time;
 	if((sscanf((char*)buf, "%hhd:%hhd:%hhd",
 			&(new_time.hours),
@@ -161,7 +164,7 @@ int main(void)
 		if(time_dirty == TRUE)
 		{
 			time = ds1307_get_time();
-			sprintf((char*)buf, "%d:%d:%d\n\r", time.hours, time.minutes, time.seconds);
+			sprintf((char*)buf, "%02d:%02d:%02d\n\r", time.hours, time.minutes, time.seconds);
 			PRINT(buf);
 			time_dirty = FALSE;
 		}
