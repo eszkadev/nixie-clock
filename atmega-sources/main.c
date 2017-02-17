@@ -43,6 +43,9 @@
 
 int main(void)
 {
+	ds1307_time_t time;
+	char buf[32];
+
 	// setup IO pins
 
 	DDRD  |= (1 << LED1)
@@ -63,6 +66,10 @@ int main(void)
 	DEBUG("UART OK\n\r");
 	ds1307_init();
 	DEBUG("RTC OK\n\r");
+
+	// set current time
+	set_time_from_string(&time, __TIME__);
+	ds1307_set_time(time);
 
 	int counter = 0;
 	while(1)
@@ -91,8 +98,7 @@ int main(void)
 		}
 
 		// read time from RTC
-		ds1307_time_t time = ds1307_get_time();
-		char buf[32];
+		time = ds1307_get_time();
 
 		sprintf(buf, "%d:%d:%d\n\r", time.hours, time.minutes, time.seconds);
 		uart_puts((uint8_t*)buf);

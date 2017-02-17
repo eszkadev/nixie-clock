@@ -22,6 +22,7 @@
 
 #include "twi.h"
 #include "ds1307.h"
+#include <stdio.h>
 
 #define DS1307W 0xD0
 #define DS1307R 0xD1
@@ -36,6 +37,11 @@ uint8_t from_BCD(uint8_t x)
 uint8_t to_BCD(uint8_t x)
 {
 	return (x % 10) + (((x / 10) % 10) << 4);
+}
+
+void set_time_from_string(ds1307_time_t* time, char* time_str)
+{
+	sscanf(time_str, "%hhd:%hhd:%hhd", &(time->hours), &(time->minutes), &(time->seconds));
 }
 
 void ds1307_init(void)
@@ -97,4 +103,19 @@ ds1307_time_t ds1307_get_time(void)
 	twi_stop();
 
 	return time;
+}
+
+void ds1307_set_time(ds1307_time_t time)
+{
+	twi_start();
+	twi_write(DS1307W);
+	twi_write(SECONDS_REG);
+	twi_write(to_BCD(time.seconds));
+	twi_write(to_BCD(time.minutes));
+	twi_write(to_BCD(time.hours));
+	twi_write(to_BCD(time.day_of_week));
+	twi_write(to_BCD(time.day));
+	twi_write(to_BCD(time.month));
+	twi_write(to_BCD(time.year));
+	twi_stop();
 }
