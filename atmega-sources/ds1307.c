@@ -105,17 +105,17 @@ ds1307_time_t ds1307_get_time(void)
 	return time;
 }
 
-void ds1307_set_time(ds1307_time_t time)
+void ds1307_set_time(ds1307_time_t* time)
 {
 	twi_start();
 	twi_write(DS1307W);
 	twi_write(SECONDS_REG);
-	twi_write(to_BCD(time.seconds));
-	twi_write(to_BCD(time.minutes));
-	twi_write(to_BCD(time.hours));
-	twi_write(to_BCD(time.day_of_week));
-	twi_write(to_BCD(time.day));
-	twi_write(to_BCD(time.month));
-	twi_write(to_BCD(time.year));
+	twi_write(to_BCD(time->seconds));
+	twi_write(to_BCD(time->minutes));
+	twi_write(to_BCD(time->hours));
+	twi_write(to_BCD(time->day_of_week));
+	twi_write(to_BCD(time->day));
+	twi_write(to_BCD(time->month));
+	twi_write(to_BCD(time->year));
 	twi_stop();
 }

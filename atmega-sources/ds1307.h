@@ -42,6 +42,6 @@ uint8_t ds1307_receive(uint8_t address);
 void ds1307_transmit(uint8_t address, uint8_t value);
 uint8_t ds1307_get_seconds(void);
 ds1307_time_t ds1307_get_time(void);
-void ds1307_set_time(ds1307_time_t time);
+void ds1307_set_time(ds1307_time_t* time);
 
 #endif /* DS1307_H_ */

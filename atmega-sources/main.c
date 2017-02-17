@@ -42,21 +42,61 @@
 // print text over UART
 #define PRINT(text) uart_puts((uint8_t*)text)
 
+#define BUFFER_SIZE 32
+
 #define TRUE 1
 #define FALSE 0
 
-ds1307_time_t time;
+volatile ds1307_time_t time;
 volatile uint8_t time_dirty = TRUE;
+volatile char buf[BUFFER_SIZE];
 
 void timer_interrupt(void)
 {
 	time_dirty = TRUE;
 }
 
+inline void time_setup(void)
+{
+	PRINT("SET DATE: ");
+	uint8_t i = 0;
+
+	do
+	{
+		buf[i] = uart_getc();
+		if(buf[i])
+		{
+			uart_putc(buf[i]);
+
+			if(buf[i] == '\n' || buf[i] == '\r')
+				break;
+
+			i++;
+			buf[i] = 0;
+		}
+	}
+	while(i < BUFFER_SIZE);
+
+	ds1307_time_t new_time;
+	if((sscanf((char*)buf, "%hhd:%hhd:%hhd",
+			&(new_time.hours),
+			&(new_time.minutes),
+			&(new_time.seconds)) == 3)
+		&& new_time.hours < 24
+		&& new_time.minutes < 60
+		&& new_time.seconds < 60)
+	{
+		ds1307_set_time(&new_time);
+		PRINT("\n\rOK\n\r");
+	}
+	else
+	{
+		PRINT("\n\rERROR\n\r");
+	}
+}
+
 int main(void)
 {
-	char buf[32];
-
 	// setup IO pins
 
 	DDRD  |= (1 << LED1)
@@ -82,8 +122,8 @@ int main(void)
 
 	// set current time
 
-	set_time_from_string(&time, __TIME__);
-	ds1307_set_time(time);
+	set_time_from_string((ds1307_time_t*)&time, __TIME__);
+	ds1307_set_time((ds1307_time_t*)&time);
 	PRINT("TIME SET OK\n\r");
 
 	int counter = 0;
@@ -111,6 +151,9 @@ int main(void)
 		{
 			uart_putc(c);
 			PRINT("\n\r");
+
+			if(c == 's')
+				time_setup();
 		}
 
 		// read time from RTC
@@ -118,7 +161,7 @@ int main(void)
 		if(time_dirty == TRUE)
 		{
 			time = ds1307_get_time();
-			sprintf(buf, "%d:%d:%d\n\r", time.hours, time.minutes, time.seconds);
+			sprintf((char*)buf, "%d:%d:%d\n\r", time.hours, time.minutes, time.seconds);
 			PRINT(buf);
 			time_dirty = FALSE;
 		}
