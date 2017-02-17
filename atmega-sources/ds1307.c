@@ -20,4 +20,43 @@
  * SOFTWARE.
  * */
 
+#include "twi.h"
+#include "ds1307.h"
 
+#define DS1307W 0xD0
+#define DS1307R 0xD1
+
+void ds1307_init(void)
+{
+	twi_init();
+}
+
+uint8_t ds1307_get_seconds(void)
+{
+	uint8_t seconds = ds1307_receive(0x00);
+	seconds = (seconds & 0x0F) + 10*((seconds >> 4) & 7);
+	return seconds;
+}
+
+void ds1307_transmit(uint8_t address, uint8_t value)
+{
+	twi_start();
+	twi_write(DS1307W);
+	twi_write(address);
+	twi_write(value);
+	twi_stop();
+}
+
+uint8_t ds1307_receive(uint8_t address)
+{
+	twi_start();
+	twi_write(DS1307W);
+	twi_write(address);
+	twi_start();
+	twi_write(DS1307R);
+
+	uint16_t ret = twi_read(NOACK);
+	twi_stop();
+
+	return ret;
+}

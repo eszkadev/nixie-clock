@@ -25,7 +25,7 @@
 
 #include <inttypes.h>
 
-#define SCL_CLOCK 40000UL
+#define SCL_CLOCK 100000UL
 
 typedef enum
 {

@@ -24,7 +24,7 @@
 #include <util/delay.h>
 
 #include "uart.h"
-#include "twi.h"
+#include "ds1307.h"
 
 // LED of life
 #define LED1 PD7
@@ -60,8 +60,8 @@ int main(void)
 
 	uart_init();
 	DEBUG("UART OK\n\r");
-	twi_init();
-	DEBUG("TWI OK\n\r");
+	ds1307_init();
+	DEBUG("RTC OK\n\r");
 
 	int counter = 0;
 	while(1)
@@ -89,6 +89,11 @@ int main(void)
 			uart_puts((uint8_t*)"\n\r");
 		}
 
+		// read seconds from RTC
+		uint8_t seconds = ds1307_get_seconds();
+		uart_putc(((seconds / 10) % 10) + 48);
+		uart_putc((seconds % 10) + 48);
+		uart_puts((uint8_t*)"\n\r");
 		_delay_ms(10);
 	}
 
