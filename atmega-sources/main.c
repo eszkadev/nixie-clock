@@ -31,6 +31,9 @@
 // LED of life
 #define LED1 PD7
 
+// buzzer
+#define BUZZER PB0
+
 // nixie's digits control
 #define DIGIT1 PD6
 #define DIGIT2 PD5
@@ -50,6 +53,7 @@
 volatile ds1307_time_t time;
 volatile uint8_t time_dirty = TRUE;
 volatile char buf[BUFFER_SIZE];
+volatile uint8_t alarm = FALSE;
 
 void timer_interrupt(void)
 {
@@ -98,6 +102,29 @@ inline void time_setup(void)
 	}
 }
 
+void buzzer(void)
+{
+	static uint8_t counter = 0;
+	counter++;
+
+	if(alarm == TRUE && counter >= 20)
+	{
+		PORTB &= ~(1 << BUZZER);
+		_delay_ms(40);
+		PORTB |= (1 << BUZZER);
+		_delay_ms(40);
+		PORTB &= ~(1 << BUZZER);
+		_delay_ms(40);
+		PORTB |= (1 << BUZZER);
+		_delay_ms(40);
+		PORTB &= ~(1 << BUZZER);
+		_delay_ms(40);
+		PORTB |= (1 << BUZZER);
+
+		counter = 0;
+	}
+}
+
 int main(void)
 {
 	// setup IO pins
@@ -113,6 +140,12 @@ int main(void)
 
 	PORTD &= ~((1 << DIGIT2)
 			| (1 << NIXIE2));
+
+	DDRB |= (1 << BUZZER);
+
+	PORTB &= ~(1 << BUZZER);
+	_delay_ms(50);
+	PORTB |= (1 << BUZZER);
 
 	// initialize all peripherals
 
@@ -168,6 +201,8 @@ int main(void)
 			PRINT(buf);
 			time_dirty = FALSE;
 		}
+
+		buzzer();
 
 		_delay_ms(10);
 	}
