@@ -26,6 +26,7 @@
 
 #include "uart.h"
 #include "ds1307.h"
+#include "timer.h"
 
 // LED of life
 #define LED1 PD7
@@ -39,11 +40,21 @@
 #define NIXIE2 PD3
 
 // print text over UART
-#define DEBUG(text) uart_puts((uint8_t*)text)
+#define PRINT(text) uart_puts((uint8_t*)text)
+
+#define TRUE 1
+#define FALSE 0
+
+ds1307_time_t time;
+volatile uint8_t time_dirty = TRUE;
+
+void timer_interrupt(void)
+{
+	time_dirty = TRUE;
+}
 
 int main(void)
 {
-	ds1307_time_t time;
 	char buf[32];
 
 	// setup IO pins
@@ -63,13 +74,17 @@ int main(void)
 	// initialize all peripherals
 
 	uart_init();
-	DEBUG("UART OK\n\r");
+	PRINT("UART OK\n\r");
 	ds1307_init();
-	DEBUG("RTC OK\n\r");
+	PRINT("RTC OK\n\r");
+	timer_init();
+	PRINT("TIMER OK\n\r");
 
 	// set current time
+
 	set_time_from_string(&time, __TIME__);
 	ds1307_set_time(time);
+	PRINT("TIME SET OK\n\r");
 
 	int counter = 0;
 	while(1)
@@ -90,18 +105,24 @@ int main(void)
 		PORTD ^=(1<<NIXIE2);
 
 		// UART echo for testing purposes
+
 		char c = uart_getc();
 		if(c)
 		{
 			uart_putc(c);
-			uart_puts((uint8_t*)"\n\r");
+			PRINT("\n\r");
 		}
 
 		// read time from RTC
-		time = ds1307_get_time();
 
-		sprintf(buf, "%d:%d:%d\n\r", time.hours, time.minutes, time.seconds);
-		uart_puts((uint8_t*)buf);
+		if(time_dirty == TRUE)
+		{
+			time = ds1307_get_time();
+			sprintf(buf, "%d:%d:%d\n\r", time.hours, time.minutes, time.seconds);
+			PRINT(buf);
+			time_dirty = FALSE;
+		}
+
 		_delay_ms(10);
 	}
 
