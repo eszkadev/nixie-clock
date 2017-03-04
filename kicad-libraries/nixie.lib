@@ -28,4 +28,18 @@ X Dot 12 600 -450 200 U 50 50 1 1 I
 ENDDRAW
 ENDDEF
 #
+# neon-lamp
+#
+DEF neon-lamp V 0 40 Y Y 1 F N
+F0 "V" 250 0 60 H V C CNN
+F1 "neon-lamp" 450 100 60 H V C CNN
+F2 "" 0 0 60 H I C CNN
+F3 "" 0 0 60 H I C CNN
+DRAW
+C 0 0 180 0 1 0 N
+X ~ 1 0 -375 200 U 50 50 1 1 I
+X ~ 2 0 375 200 D 50 50 1 1 I
+ENDDRAW
+ENDDEF
+#
 #End Library
