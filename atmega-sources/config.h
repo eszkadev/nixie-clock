@@ -26,15 +26,59 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 
-#ifndef INCLUDE_TIMER_H_
-#define INCLUDE_TIMER_H_
+#ifndef CONFIG_H_
+#define CONFIG_H_
 
-#include <inttypes.h>
+/*
+ * Config file - describes the device configuration
+ */
 
-void timer_init(void);
-void timer_set_frequency(uint16_t frequency);
+/*
+ * Platform - determines which MCU is used
+ * Supported values:
+ */
 
-void timer1_init(void);
-void timer1_set_frequency(uint16_t frequency);
+#define ATMEGA328 1
+#define ATMEGA16  2
 
-#endif /* INCLUDE_TIMER_H_ */
+#define _PLATFORM ATMEGA328
+
+/*
+ * Clock - determines the clock frequency
+ */
+
+#define _CLOCK F_CPU
+
+/*
+ * Baud rate - determines the baud rate used to communicate with PC
+ * Supported values:
+ * clock 8 MHz:
+ *     9600
+ *     19200
+ *     38400
+ *     57600 !!! Error = 2.1 %
+ *     76800
+ */
+
+#define _BAUD_RATE 38400
+
+/*
+ * Accelerometer - determines which model is used
+ * Supported values:
+ */
+
+#define ADXL345 1
+#define MPU6050 2
+
+#define _ACCELEROMETER MPU6050
+
+/*
+ * Magnetometer - determines which sensor is used
+ * Supported values:
+ */
+
+#define HMC5883L 1
+
+#define _MAGNETOMETER HMC5883L
+
+#endif /* CONFIG_H_ */

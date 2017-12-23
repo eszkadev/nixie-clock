@@ -26,15 +26,70 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 
-#ifndef INCLUDE_TIMER_H_
-#define INCLUDE_TIMER_H_
+#include "config.h"
 
-#include <inttypes.h>
+#if _PLATFORM == ATMEGA328
 
-void timer_init(void);
-void timer_set_frequency(uint16_t frequency);
+#include "timer.h"
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
-void timer1_init(void);
-void timer1_set_frequency(uint16_t frequency);
+volatile uint16_t timer_frequency = 25;
+volatile uint16_t timer1_frequency = 25;
 
-#endif /* INCLUDE_TIMER_H_ */
+#define PRESCALE_FACTOR 1024
+#define OCR0_VALUE ((_CLOCK/timer_frequency/2/PRESCALE_FACTOR)-1)
+#define OCR1_VALUE ((_CLOCK/timer1_frequency/2/PRESCALE_FACTOR)-1)
+
+extern void timer_interrupt(void);
+extern void timer1_interrupt(void);
+
+ISR(TIMER0_COMPA_vect)
+{
+    timer_interrupt();
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+    timer1_interrupt();
+}
+
+void timer_init(void)
+{
+    OCR0A = (uint8_t)OCR0_VALUE;
+    TCNT0 = 0;
+
+    TCCR0A |= (1 << WGM01); // CTC mode
+    TCCR0B |= (1 << CS00) | (1 << CS02); // prescaler clk/1024
+    TIMSK0 |= (1 << OCIE0A); // Enable interrupt
+}
+
+void timer_set_frequency(uint16_t frequency)
+{
+    timer_frequency = frequency;
+
+    cli();
+    timer_init();
+    sei();
+}
+
+void timer1_init(void)
+{
+    OCR1A = (uint8_t)OCR1_VALUE;
+    TCNT1 = 0;
+
+    TCCR1A |= (1 << WGM01); // CTC mode
+    TCCR1B |= (1 << CS00) | (1 << CS02); // prescaler clk/1024
+    TIMSK1 |= (1 << OCIE1A); // Enable interrupt
+}
+
+void timer1_set_frequency(uint16_t frequency)
+{
+    timer1_frequency = frequency;
+
+    cli();
+    timer1_init();
+    sei();
+}
+
+#endif

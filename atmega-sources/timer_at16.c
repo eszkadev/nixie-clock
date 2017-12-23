@@ -20,6 +20,10 @@
  * SOFTWARE.
  * */
 
+#include "config.h"
+
+#if _PLATFORM == ATMEGA16
+
 #include "timer.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -49,3 +53,10 @@ void timer_init(void)
 
 	sei();
 }
+
+void timer1_init(void)
+{
+	// TODO
+}
+
+#endif

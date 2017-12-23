@@ -20,6 +20,10 @@
  * SOFTWARE.
  * */
 
+#include "config.h"
+
+#if _PLATFORM == ATMEGA16
+
 #include "twi.h"
 #include <avr/io.h>
 
@@ -57,3 +61,5 @@ uint8_t twi_read(ack_bit ack)
 	while(!(TWCR & (1 << TWINT)));
 	return TWDR;
 }
+
+#endif

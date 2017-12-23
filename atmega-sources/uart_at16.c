@@ -20,6 +20,10 @@
  * SOFTWARE.
  * */
 
+#include "config.h"
+
+#if _PLATFORM == ATMEGA16
+
 #include "uart.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -137,3 +141,5 @@ void uart_put_bytes(uint8_t* tab, uint8_t size)
 		while(!(UCSRA & (1 << TXC)));
 	}
 }
+
+#endif

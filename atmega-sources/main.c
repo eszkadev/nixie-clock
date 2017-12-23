@@ -27,20 +27,16 @@
 #include "uart.h"
 #include "ds1307.h"
 #include "timer.h"
+#include "multiplexing.h"
 
 // LED of life
-#define LED1 PD7
+#define LED1        PD1
+#define LED1_DDR    DDRD
+#define LED1_PORT   PORTD
 
 // buzzer
-#define BUZZER PB0
-
-// nixie's digits control
-#define DIGIT1 PD6
-#define DIGIT2 PD5
-
-// nixie's anodes control
-#define NIXIE1 PD4
-#define NIXIE2 PD3
+#define BUZZER      PD0
+#define BUZZER_PORT PORTD
 
 // print text over UART
 #define PRINT(text) uart_puts((uint8_t*)text)
@@ -54,158 +50,138 @@ volatile ds1307_time_t time;
 volatile uint8_t time_dirty = TRUE;
 volatile char buf[BUFFER_SIZE];
 volatile uint8_t alarm = FALSE;
+volatile uint8_t timer1_counter = 0;
 
+// invalidate time
 void timer_interrupt(void)
 {
-	time_dirty = TRUE;
+    time_dirty = TRUE;
+}
+
+// display multiplexing
+void timer1_interrupt(void)
+{
+    timer1_counter++;
+
+    if(timer1_counter < 20)
+        show_number(3, time.seconds % 10);
+    else if(timer1_counter < 25)
+        turn_off();
+    else
+        timer1_counter = 0;
 }
 
 inline void time_setup(void)
 {
-	PRINT("SET DATE: ");
-	uint8_t i = 0;
+    PRINT("SET DATE: ");
+    uint8_t i = 0;
 
-	do
-	{
-		buf[i] = uart_getc();
-		if(buf[i])
-		{
-			uart_putc(buf[i]);
+    do
+    {
+        buf[i] = uart_getc();
+        if(buf[i])
+        {
+            uart_putc(buf[i]);
 
-			if(buf[i] == '\n' || buf[i] == '\r')
-				break;
+            if(buf[i] == '\n' || buf[i] == '\r')
+                break;
 
-			i++;
-			buf[i] = 0;
-		}
-	}
-	while(i < BUFFER_SIZE);
+            i++;
+            buf[i] = 0;
+        }
+    }
+    while(i < BUFFER_SIZE);
 
-	if(i < BUFFER_SIZE)
-		buf[i] = 0;
+    if(i < BUFFER_SIZE)
+        buf[i] = 0;
 
-	ds1307_time_t new_time;
-	if((sscanf((char*)buf, "%hhd:%hhd:%hhd",
-			&(new_time.hours),
-			&(new_time.minutes),
-			&(new_time.seconds)) == 3)
-		&& new_time.hours < 24
-		&& new_time.minutes < 60
-		&& new_time.seconds < 60)
-	{
-		ds1307_set_time(&new_time);
-		PRINT("\n\rOK\n\r");
-	}
-	else
-	{
-		PRINT("\n\rERROR\n\r");
-	}
+    ds1307_time_t new_time;
+    if((sscanf((char*)buf, "%hhd:%hhd:%hhd",
+            &(new_time.hours),
+            &(new_time.minutes),
+            &(new_time.seconds)) == 3)
+        && new_time.hours < 24
+        && new_time.minutes < 60
+        && new_time.seconds < 60)
+    {
+        ds1307_set_time(&new_time);
+        PRINT("\n\rOK\n\r");
+    }
+    else
+    {
+        PRINT("\n\rERROR\n\r");
+    }
 }
 
 void buzzer(void)
 {
-	static uint8_t counter = 0;
-	counter++;
+    static uint8_t counter = 0;
+    counter++;
 
-	if(alarm == TRUE && counter >= 20)
-	{
-		PORTB &= ~(1 << BUZZER);
-		_delay_ms(40);
-		PORTB |= (1 << BUZZER);
-		_delay_ms(40);
-		PORTB &= ~(1 << BUZZER);
-		_delay_ms(40);
-		PORTB |= (1 << BUZZER);
-		_delay_ms(40);
-		PORTB &= ~(1 << BUZZER);
-		_delay_ms(40);
-		PORTB |= (1 << BUZZER);
+    if(alarm == TRUE && counter >= 20)
+    {
+        BUZZER_PORT &= ~(1 << BUZZER);
+        _delay_ms(40);
+        BUZZER_PORT |= (1 << BUZZER);
+        _delay_ms(40);
+        BUZZER_PORT &= ~(1 << BUZZER);
+        _delay_ms(40);
+        BUZZER_PORT |= (1 << BUZZER);
+        _delay_ms(40);
+        BUZZER_PORT &= ~(1 << BUZZER);
+        _delay_ms(40);
+        BUZZER_PORT |= (1 << BUZZER);
 
-		counter = 0;
-	}
+        counter = 0;
+    }
 }
 
 int main(void)
 {
-	// setup IO pins
+    // setup IO pins
+    LED1_DDR |= (1 << LED1);
 
-	DDRD  |= (1 << LED1)
-			| (1 << DIGIT2)
-			| (1 << DIGIT1)
-			| (1 << NIXIE1)
-			| (1 << NIXIE2);
+    // initialize all peripherals
+    multiplexing_init();
+    uart_init();
+    PRINT("UART OK\n\r");
+    ds1307_init();
+    PRINT("RTC OK\n\r");
+    timer_init();
+    timer1_init();
+    PRINT("TIMER OK\n\r");
 
-	PORTD |= (1 << DIGIT1)
-			| (1 << NIXIE1);
+    // set current time
+    set_time_from_string((ds1307_time_t*)&time, __TIME__);
+    ds1307_set_time((ds1307_time_t*)&time);
+    PRINT("TIME SET OK\n\r");
 
-	PORTD &= ~((1 << DIGIT2)
-			| (1 << NIXIE2));
+    while(1)
+    {
+        LED1_PORT ^= (1 << LED1);
 
-	DDRB |= (1 << BUZZER);
+        // UART echo for testing purposes
+        char c = uart_getc();
+        if(c)
+        {
+            uart_putc(c);
+            PRINT("\n\r");
 
-	PORTB &= ~(1 << BUZZER);
-	_delay_ms(50);
-	PORTB |= (1 << BUZZER);
+            if(c == 's')
+                time_setup();
+        }
 
-	// initialize all peripherals
+        // read time from RTC
+        if(time_dirty == TRUE)
+        {
+            time = ds1307_get_time();
+            sprintf((char*)buf, "%02d:%02d:%02d\n\r", time.hours, time.minutes, time.seconds);
+            PRINT(buf);
+            time_dirty = FALSE;
+        }
 
-	uart_init();
-	PRINT("UART OK\n\r");
-	ds1307_init();
-	PRINT("RTC OK\n\r");
-	timer_init();
-	PRINT("TIMER OK\n\r");
+        _delay_ms(10);
+    }
 
-	// set current time
-
-	set_time_from_string((ds1307_time_t*)&time, __TIME__);
-	ds1307_set_time((ds1307_time_t*)&time);
-	PRINT("TIME SET OK\n\r");
-
-	int counter = 0;
-	while(1)
-	{
-		PORTD ^=(1<<LED1);
-		PORTD ^=(1<<DIGIT1);
-		PORTD ^=(1<<DIGIT2);
-
-		counter++;
-		if(counter == 100)
-		{
-			PORTD ^=(1<<DIGIT1);
-			PORTD ^=(1<<DIGIT2);
-			counter = 0;
-		}
-
-		PORTD ^=(1<<NIXIE1);
-		PORTD ^=(1<<NIXIE2);
-
-		// UART echo for testing purposes
-
-		char c = uart_getc();
-		if(c)
-		{
-			uart_putc(c);
-			PRINT("\n\r");
-
-			if(c == 's')
-				time_setup();
-		}
-
-		// read time from RTC
-
-		if(time_dirty == TRUE)
-		{
-			time = ds1307_get_time();
-			sprintf((char*)buf, "%02d:%02d:%02d\n\r", time.hours, time.minutes, time.seconds);
-			PRINT(buf);
-			time_dirty = FALSE;
-		}
-
-		buzzer();
-
-		_delay_ms(10);
-	}
-
-	return 0;
+    return 0;
 }
