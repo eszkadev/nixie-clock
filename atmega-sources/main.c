@@ -50,7 +50,6 @@ volatile ds1307_time_t time;
 volatile uint8_t time_dirty = TRUE;
 volatile char buf[BUFFER_SIZE];
 volatile uint8_t alarm = FALSE;
-volatile uint8_t timer1_counter = 0;
 
 // invalidate time
 void timer_interrupt(void)
@@ -61,14 +60,7 @@ void timer_interrupt(void)
 // display multiplexing
 void timer1_interrupt(void)
 {
-    timer1_counter++;
-
-    if(timer1_counter < 20)
-        show_number(3, time.seconds % 10);
-    else if(timer1_counter < 25)
-        turn_off();
-    else
-        timer1_counter = 0;
+    show_number(3, time.seconds % 10);
 }
 
 inline void time_setup(void)
