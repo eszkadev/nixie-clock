@@ -28,7 +28,12 @@ volatile uint8_t _last_tube = TURN_OFF;
 volatile uint8_t _last_digit = TURN_OFF;
 
 #define _INIT(PIN) \
-    PIN ## _DDR |= PIN
+    PIN ## _DDR |= PIN; \
+    PIN ## _PORT &= ~(PIN)
+
+#define _INIT_TUBE(PIN) \
+    PIN ## _DDR |= PIN; \
+    PIN ## _PORT &= ~(PIN)
 
 #define _SET_ON(PIN) \
     PIN ## _PORT |= PIN
@@ -173,28 +178,11 @@ inline void multiplexing_init(void)
     _INIT(DIGIT_8);
     _INIT(DIGIT_9);
 
-    _SET_OFF(DIGIT_0);
-    _SET_OFF(DIGIT_1);
-    _SET_OFF(DIGIT_2);
-    _SET_OFF(DIGIT_3);
-    _SET_OFF(DIGIT_4);
-    _SET_OFF(DIGIT_5);
-    _SET_OFF(DIGIT_6);
-    _SET_OFF(DIGIT_7);
-    _SET_OFF(DIGIT_8);
-    _SET_OFF(DIGIT_9);
-
-    _INIT(NIXIE_0);
-    _INIT(NIXIE_1);
-    _INIT(NIXIE_2);
-    _INIT(NIXIE_3);
-    _INIT(NIXIE_4);
-
-    _SET_OFF(NIXIE_0);
-    _SET_OFF(NIXIE_1);
-    _SET_OFF(NIXIE_2);
-    _SET_OFF(NIXIE_3);
-    _SET_OFF(NIXIE_4);
+    _INIT_TUBE(NIXIE_0);
+    _INIT_TUBE(NIXIE_1);
+    _INIT_TUBE(NIXIE_2);
+    _INIT_TUBE(NIXIE_3);
+    _INIT_TUBE(NIXIE_4);
 }
 
 inline void show_number(uint8_t tube, uint8_t digit)

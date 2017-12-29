@@ -23,9 +23,12 @@
 #ifndef MULTIPLEXING_H_
 #define MULTIPLEXING_H_
 
+#include "config.h"
 #include <avr/io.h>
 
 // nixie's digits control
+
+#if _PLATFORM == ATMEGA328
 
 #define DIGIT_0      (1 << PB1)
 #define DIGIT_0_DDR  DDRB
@@ -67,7 +70,57 @@
 #define DIGIT_9_DDR  DDRB
 #define DIGIT_9_PORT PORTB
 
+#endif
+
+#if _PLATFORM == ATMEGA16
+
+
+#define DIGIT_0      (1 << PA0)
+#define DIGIT_0_DDR  DDRA
+#define DIGIT_0_PORT PORTA
+
+#define DIGIT_1      (1 << PA1)
+#define DIGIT_1_DDR  DDRA
+#define DIGIT_1_PORT PORTA
+
+#define DIGIT_2      (1 << PA2)
+#define DIGIT_2_DDR  DDRA
+#define DIGIT_2_PORT PORTA
+
+#define DIGIT_3      (1 << PA3)
+#define DIGIT_3_DDR  DDRA
+#define DIGIT_3_PORT PORTA
+
+#define DIGIT_4      (1 << PA4)
+#define DIGIT_4_DDR  DDRA
+#define DIGIT_4_PORT PORTA
+
+#define DIGIT_5      (1 << PB0)
+#define DIGIT_5_DDR  DDRB
+#define DIGIT_5_PORT PORTB
+
+#define DIGIT_6      (1 << PB1)
+#define DIGIT_6_DDR  DDRB
+#define DIGIT_6_PORT PORTB
+
+#define DIGIT_7      (1 << PB2)
+#define DIGIT_7_DDR  DDRB
+#define DIGIT_7_PORT PORTB
+
+#define DIGIT_8      (1 << PB3)
+#define DIGIT_8_DDR  DDRB
+#define DIGIT_8_PORT PORTB
+
+#define DIGIT_9      (1 << PB4)
+#define DIGIT_9_DDR  DDRB
+#define DIGIT_9_PORT PORTB
+
+
+#endif
+
 // nixie's anodes control
+
+#if _PLATFORM == ATMEGA328
 
 #define NIXIE_0      (1 << PC0)
 #define NIXIE_0_DDR  DDRC
@@ -81,13 +134,39 @@
 #define NIXIE_2_DDR  DDRC
 #define NIXIE_2_PORT PORTC
 
-#define NIXIE_3      (1 << PC3)
-#define NIXIE_3_DDR  DDRC
-#define NIXIE_3_PORT PORTC
+#define NIXIE_3      (1 << PD3)
+#define NIXIE_3_DDR  DDRD
+#define NIXIE_3_PORT PORTD
 
-#define NIXIE_4      (1 << PD4)
+#define NIXIE_4      (1 << PD2)
 #define NIXIE_4_DDR  DDRD
 #define NIXIE_4_PORT PORTD
+
+#endif
+
+#if _PLATFORM == ATMEGA16
+
+#define NIXIE_0      (1 << PD2)
+#define NIXIE_0_DDR  DDRD
+#define NIXIE_0_PORT PORTD
+
+#define NIXIE_1      (1 << PD3)
+#define NIXIE_1_DDR  DDRD
+#define NIXIE_1_PORT PORTD
+
+#define NIXIE_2      (1 << PD4)
+#define NIXIE_2_DDR  DDRD
+#define NIXIE_2_PORT PORTD
+
+#define NIXIE_3      (1 << PD5)
+#define NIXIE_3_DDR  DDRD
+#define NIXIE_3_PORT PORTD
+
+#define NIXIE_4      (1 << PD6)
+#define NIXIE_4_DDR  DDRD
+#define NIXIE_4_PORT PORTD
+
+#endif
 
 // functions
 

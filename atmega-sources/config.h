@@ -41,7 +41,7 @@
 #define ATMEGA328 1
 #define ATMEGA16  2
 
-#define _PLATFORM ATMEGA328
+#define _PLATFORM ATMEGA16
 
 /*
  * Clock - determines the clock frequency
@@ -60,25 +60,6 @@
  *     76800
  */
 
-#define _BAUD_RATE 38400
-
-/*
- * Accelerometer - determines which model is used
- * Supported values:
- */
-
-#define ADXL345 1
-#define MPU6050 2
-
-#define _ACCELEROMETER MPU6050
-
-/*
- * Magnetometer - determines which sensor is used
- * Supported values:
- */
-
-#define HMC5883L 1
-
-#define _MAGNETOMETER HMC5883L
+#define _BAUD_RATE 9600
 
 #endif /* CONFIG_H_ */

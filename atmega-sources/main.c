@@ -30,7 +30,7 @@
 #include "multiplexing.h"
 
 // LED of life
-#define LED1        PD1
+#define LED1        PD7
 #define LED1_DDR    DDRD
 #define LED1_PORT   PORTD
 
@@ -50,6 +50,7 @@ volatile ds1307_time_t time;
 volatile uint8_t time_dirty = TRUE;
 volatile char buf[BUFFER_SIZE];
 volatile uint8_t alarm = FALSE;
+volatile uint8_t nixie = 0;
 
 // invalidate time
 void timer_interrupt(void)
@@ -60,7 +61,7 @@ void timer_interrupt(void)
 // display multiplexing
 void timer1_interrupt(void)
 {
-    show_number(3, time.seconds % 10);
+    // TODO
 }
 
 inline void time_setup(void)
@@ -132,6 +133,7 @@ int main(void)
 {
     // setup IO pins
     LED1_DDR |= (1 << LED1);
+    LED1_PORT |= (1 << LED1);
 
     // initialize all peripherals
     multiplexing_init();
@@ -150,7 +152,19 @@ int main(void)
 
     while(1)
     {
-        LED1_PORT ^= (1 << LED1);
+        // TEST
+        nixie = 3;
+        show_number(nixie, nixie);
+        _delay_ms(5);
+        nixie = 4;
+        show_number(nixie, nixie);
+
+        static int led = 0;
+        led++;
+        if(led % 2 == 0)
+            LED1_PORT |= (1 << LED1);
+        else
+            LED1_PORT &= ~(1 << LED1);
 
         // UART echo for testing purposes
         char c = uart_getc();
@@ -172,7 +186,7 @@ int main(void)
             time_dirty = FALSE;
         }
 
-        _delay_ms(10);
+        _delay_ms(5);
     }
 
     return 0;
