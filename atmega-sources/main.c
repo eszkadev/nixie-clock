@@ -139,16 +139,20 @@ int main(void)
     multiplexing_init();
     uart_init();
     PRINT("UART OK\n\r");
+#ifdef RTC
     ds1307_init();
     PRINT("RTC OK\n\r");
+#endif
     timer_init();
     timer1_init();
     PRINT("TIMER OK\n\r");
 
+#ifdef RTC
     // set current time
     set_time_from_string((ds1307_time_t*)&time, __TIME__);
     ds1307_set_time((ds1307_time_t*)&time);
     PRINT("TIME SET OK\n\r");
+#endif
 
     while(1)
     {
@@ -177,14 +181,18 @@ int main(void)
                 time_setup();
         }
 
+#ifdef RTC
         // read time from RTC
         if(time_dirty == TRUE)
         {
+            LED1_PORT &= ~(1 << LED1);
             time = ds1307_get_time();
             sprintf((char*)buf, "%02d:%02d:%02d\n\r", time.hours, time.minutes, time.seconds);
             PRINT(buf);
             time_dirty = FALSE;
+            LED1_PORT |= (1 << LED1);
         }
+#endif
 
         _delay_ms(5);
     }

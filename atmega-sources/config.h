@@ -62,4 +62,6 @@
 
 #define _BAUD_RATE 9600
 
+//#define RTC
+
 #endif /* CONFIG_H_ */
