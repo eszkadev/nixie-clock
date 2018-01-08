@@ -30,9 +30,10 @@
 #include <inttypes.h>
 
 #define FREQUENCY 25
+#define FREQUENCY1 150
 #define PRESCALE_FACTOR 256
 #define OCR0_VALUE ((F_CPU/FREQUENCY/2/PRESCALE_FACTOR)-1)
-#define OCR1_VALUE ((F_CPU/FREQUENCY/2/PRESCALE_FACTOR)-1)
+#define OCR1_VALUE ((F_CPU/FREQUENCY1/2/PRESCALE_FACTOR)-1)
 
 extern void timer_interrupt(void);
 extern void timer1_interrupt(void);
@@ -42,7 +43,7 @@ ISR(TIMER0_COMP_vect)
     timer_interrupt();
 }
 
-ISR(TIMER1_COMP_vect)
+ISR(TIMER1_COMPA_vect)
 {
     timer1_interrupt();
 }
@@ -68,8 +69,8 @@ void timer1_init(void)
     OCR1A = (uint8_t)OCR1_VALUE;
     TCNT1 = 0;
 
-    TCCR1A |= (1 << WGM01); // CTC mode
-    TCCR1A |= (1 << CS02); // Prescaler IO/256
+    TCCR1B |= (1 << WGM12); // CTC mode
+    TCCR1B |= (1 << CS02); // Prescaler IO/256
     TIMSK |= (1 << OCIE1A); // Enable interrupt
 
     sei();
