@@ -52,6 +52,17 @@ volatile char buf[BUFFER_SIZE];
 volatile uint8_t alarm = FALSE;
 volatile uint8_t nixie = 0;
 
+static uint8_t led = 0;
+
+static inline void invert_led()
+{
+    led++;
+    if(led % 2 == 0)
+        LED1_PORT |= (1 << LED1);
+    else
+        LED1_PORT &= ~(1 << LED1);
+}
+
 // invalidate time
 void timer_interrupt(void)
 {
@@ -61,7 +72,32 @@ void timer_interrupt(void)
 // display multiplexing
 void timer1_interrupt(void)
 {
-    // TODO
+    switch(nixie)
+    {
+    case 0:
+        nixie++;
+        break;
+
+    case 1:
+        show_number(1, time.hours / 10);
+        nixie++;
+        break;
+
+    case 2:
+        show_number(2, time.hours % 10);
+        nixie++;
+        break;
+
+    case 3:
+        show_number(3, time.minutes / 10);
+        nixie++;
+        break;
+
+    case 4:
+        show_number(4, time.minutes % 10);
+        nixie = 0;
+        break;
+    }
 }
 
 inline void time_setup(void)
@@ -156,19 +192,7 @@ int main(void)
 
     while(1)
     {
-        // TEST
-        nixie = 3;
-        show_number(nixie, nixie);
-        _delay_ms(5);
-        nixie = 4;
-        show_number(nixie, nixie);
-
-        static int led = 0;
-        led++;
-        if(led % 2 == 0)
-            LED1_PORT |= (1 << LED1);
-        else
-            LED1_PORT &= ~(1 << LED1);
+        invert_led();
 
         // UART echo for testing purposes
         char c = uart_getc();
@@ -185,16 +209,12 @@ int main(void)
         // read time from RTC
         if(time_dirty == TRUE)
         {
-            LED1_PORT &= ~(1 << LED1);
             time = ds1307_get_time();
             sprintf((char*)buf, "%02d:%02d:%02d\n\r", time.hours, time.minutes, time.seconds);
             PRINT(buf);
             time_dirty = FALSE;
-            LED1_PORT |= (1 << LED1);
         }
 #endif
-
-        _delay_ms(5);
     }
 
     return 0;
