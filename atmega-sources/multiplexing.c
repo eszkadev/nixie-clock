@@ -92,34 +92,34 @@ inline void _set_off_digit(uint8_t digit)
     switch(digit)
     {
     case 0:
-        _SET_OFF(DIGIT_0);
+        _SET_OFF(DIGIT_9);
         break;
     case 1:
-        _SET_OFF(DIGIT_1);
+        _SET_OFF(DIGIT_0);
         break;
     case 2:
-        _SET_OFF(DIGIT_2);
+        _SET_OFF(DIGIT_1);
         break;
     case 3:
-        _SET_OFF(DIGIT_3);
+        _SET_OFF(DIGIT_2);
         break;
     case 4:
-        _SET_OFF(DIGIT_4);
+        _SET_OFF(DIGIT_3);
         break;
     case 5:
-        _SET_OFF(DIGIT_5);
+        _SET_OFF(DIGIT_4);
         break;
     case 6:
-        _SET_OFF(DIGIT_6);
+        _SET_OFF(DIGIT_5);
         break;
     case 7:
-        _SET_OFF(DIGIT_7);
+        _SET_OFF(DIGIT_6);
         break;
     case 8:
-        _SET_OFF(DIGIT_8);
+        _SET_OFF(DIGIT_7);
         break;
     case 9:
-        _SET_OFF(DIGIT_9);
+        _SET_OFF(DIGIT_8);
         break;
     }
     _last_digit = TURN_OFF;
@@ -130,34 +130,34 @@ inline void _set_on_digit(uint8_t digit)
     switch(digit)
     {
     case 0:
-        _SET_ON(DIGIT_0);
+        _SET_ON(DIGIT_9);
         break;
     case 1:
-        _SET_ON(DIGIT_1);
+        _SET_ON(DIGIT_0);
         break;
     case 2:
-        _SET_ON(DIGIT_2);
+        _SET_ON(DIGIT_1);
         break;
     case 3:
-        _SET_ON(DIGIT_3);
+        _SET_ON(DIGIT_2);
         break;
     case 4:
-        _SET_ON(DIGIT_4);
+        _SET_ON(DIGIT_3);
         break;
     case 5:
-        _SET_ON(DIGIT_5);
+        _SET_ON(DIGIT_4);
         break;
     case 6:
-        _SET_ON(DIGIT_6);
+        _SET_ON(DIGIT_5);
         break;
     case 7:
-        _SET_ON(DIGIT_7);
+        _SET_ON(DIGIT_6);
         break;
     case 8:
-        _SET_ON(DIGIT_8);
+        _SET_ON(DIGIT_7);
         break;
     case 9:
-        _SET_ON(DIGIT_9);
+        _SET_ON(DIGIT_8);
         break;
     }
     _last_digit = digit;
@@ -187,8 +187,8 @@ inline void multiplexing_init(void)
 
 inline void show_number(uint8_t tube, uint8_t digit)
 {
-    _set_off_tube(_last_tube);
     _set_off_digit(_last_digit);
+    _set_off_tube(_last_tube);
 
     _set_on_digit(digit);
     _set_on_tube(tube);
@@ -196,6 +196,8 @@ inline void show_number(uint8_t tube, uint8_t digit)
 
 inline void turn_off(void)
 {
-    _set_off_tube(_last_tube);
     _set_off_digit(_last_digit);
+    _set_off_tube(_last_tube);
+    _last_tube = TURN_OFF;
+    _last_digit = TURN_OFF;
 }
