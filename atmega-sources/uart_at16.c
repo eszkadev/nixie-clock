@@ -44,102 +44,102 @@ volatile uint8_t* uart_rx_out;
 
 ISR(USART_RXC_vect)
 {
-	uint8_t tmp = UDR;
+    uint8_t tmp = UDR;
 
-	if(uart_rx_counter < UART_RX_BUF_SIZE)
-	{
-		*uart_rx_in = tmp;
-		uart_rx_counter++;
-		if(++uart_rx_in >= uart_rx_buffer + UART_RX_BUF_SIZE)
-			uart_rx_in = uart_rx_buffer;
-	}
+    if(uart_rx_counter < UART_RX_BUF_SIZE)
+    {
+        *uart_rx_in = tmp;
+        uart_rx_counter++;
+        if(++uart_rx_in >= uart_rx_buffer + UART_RX_BUF_SIZE)
+            uart_rx_in = uart_rx_buffer;
+    }
 }
 
 void uart_init(void)
 {
-	// Setup IO pins
-	UART_DDR |= (1 << UART_TX);
-	UART_DDR &= ~(1 << UART_RX);
-	UART_PORT |= (1 << UART_RX);
+    // Setup IO pins
+    UART_DDR |= (1 << UART_TX);
+    UART_DDR &= ~(1 << UART_RX);
+    UART_PORT |= (1 << UART_RX);
 
-	#include <util/setbaud.h>
+    #include <util/setbaud.h>
 
-	UBRRH = UBRRH_VALUE;
-	UBRRL = UBRRL_VALUE;
-	#ifdef USE_2X
-		UCSRA |=  (1 << U2X);
-	#else
-		UCSRA &= ~(1 << U2X);
-	#endif
+    UBRRH = UBRRH_VALUE;
+    UBRRL = UBRRL_VALUE;
+    #ifdef USE_2X
+        UCSRA |=  (1 << U2X);
+    #else
+        UCSRA &= ~(1 << U2X);
+    #endif
 
-	// Set frame format 8-N-1
-	UCSRC = (1 << URSEL) | (1 << UCSZ1) | (1 << UCSZ0);
+    // Set frame format 8-N-1
+    UCSRC = (1 << URSEL) | (1 << UCSZ1) | (1 << UCSZ0);
 
-	// Enable RX and TX
-	UCSRB = (1 << RXEN) | (1 << TXEN);
+    // Enable RX and TX
+    UCSRB = (1 << RXEN) | (1 << TXEN);
 
-	// Disable interrupts
-	cli();
+    // Disable interrupts
+    cli();
 
-	// Enable RX interrupt
-	UCSRB |= (1 << RXCIE);
+    // Enable RX interrupt
+    UCSRB |= (1 << RXCIE);
 
-	uart_rx_in = uart_rx_out = uart_rx_buffer;
-	uart_rx_counter = 0;
+    uart_rx_in = uart_rx_out = uart_rx_buffer;
+    uart_rx_counter = 0;
 
-	// Enable interrupts
-	sei();
+    // Enable interrupts
+    sei();
 }
 
 void uart_putc(uint8_t c)
 {
-	while(!(UCSRA & (1 << UDRE)));
+    while(!(UCSRA & (1 << UDRE)));
 
-	UDR = c;
+    UDR = c;
 
-	UCSRA |= (1 << TXC);
-	while(!(UCSRA & (1 << TXC)));
+    UCSRA |= (1 << TXC);
+    while(!(UCSRA & (1 << TXC)));
 }
 
 uint8_t uart_getc(void)
 {
-	if(!uart_rx_counter)
-		return EMPTY_BUFFER;
+    if(!uart_rx_counter)
+        return EMPTY_BUFFER;
 
-	cli();
-	uint8_t c = *uart_rx_out;
+    cli();
+    uint8_t c = *uart_rx_out;
 
-	uart_rx_counter--;
-	if(++uart_rx_out >= uart_rx_buffer + UART_RX_BUF_SIZE)
-		uart_rx_out = uart_rx_buffer;
+    uart_rx_counter--;
+    if(++uart_rx_out >= uart_rx_buffer + UART_RX_BUF_SIZE)
+        uart_rx_out = uart_rx_buffer;
 
-	sei();
+    sei();
 
-	return c;
+    return c;
 }
 
 void uart_puts(uint8_t* s)
 {
-	while(!(UCSRA & (1 << UDRE)));
+    while(!(UCSRA & (1 << UDRE)));
 
-	while(*s != 0)
-	{
-		UDR = *s++;
-		UCSRA |= (1 << TXC);
-		while(!(UCSRA & (1 << TXC)));
-	}
+    while(*s != 0)
+    {
+        UDR = *s++;
+        UCSRA |= (1 << TXC);
+        while(!(UCSRA & (1 << TXC)));
+    }
 }
 
 void uart_put_bytes(uint8_t* tab, uint8_t size)
 {
-	while(!(UCSRA & (1 << UDRE)));
+    while(!(UCSRA & (1 << UDRE)));
 
-	while(size--)
-	{
-		UDR = *tab++;
-		UCSRA |= (1 << TXC);
-		while(!(UCSRA & (1 << TXC)));
-	}
+    while(size--)
+    {
+        UDR = *tab++;
+        UCSRA |= (1 << TXC);
+        while(!(UCSRA & (1 << TXC)));
+    }
 }
 
 #endif

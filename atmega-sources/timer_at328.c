@@ -75,6 +75,7 @@ void timer_set_frequency(uint16_t frequency)
 
 void timer1_init(void)
 {
+    // TODO: Check
     OCR1A = (uint8_t)OCR1_VALUE;
     TCNT1 = 0;
 
