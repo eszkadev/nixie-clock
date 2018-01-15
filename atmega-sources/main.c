@@ -34,10 +34,6 @@
 #define LED1_DDR    DDRD
 #define LED1_PORT   PORTD
 
-// buzzer
-#define BUZZER      PD0
-#define BUZZER_PORT PORTD
-
 // print text over UART
 #define PRINT(text) uart_puts((uint8_t*)text)
 
@@ -49,7 +45,6 @@
 volatile ds1307_time_t time;
 volatile uint8_t time_dirty = TRUE;
 volatile char buf[BUFFER_SIZE];
-volatile uint8_t alarm = FALSE;
 volatile uint8_t nixie = 0;
 
 static uint8_t led = 0;
@@ -142,29 +137,6 @@ inline void time_setup(void)
     }
 }
 
-void buzzer(void)
-{
-    static uint8_t counter = 0;
-    counter++;
-
-    if(alarm == TRUE && counter >= 20)
-    {
-        BUZZER_PORT &= ~(1 << BUZZER);
-        _delay_ms(40);
-        BUZZER_PORT |= (1 << BUZZER);
-        _delay_ms(40);
-        BUZZER_PORT &= ~(1 << BUZZER);
-        _delay_ms(40);
-        BUZZER_PORT |= (1 << BUZZER);
-        _delay_ms(40);
-        BUZZER_PORT &= ~(1 << BUZZER);
-        _delay_ms(40);
-        BUZZER_PORT |= (1 << BUZZER);
-
-        counter = 0;
-    }
-}
-
 int main(void)
 {
     // setup IO pins
@@ -184,16 +156,14 @@ int main(void)
     PRINT("TIMER OK\n\r");
 
 #ifdef RTC
-    // set current time
-    set_time_from_string((ds1307_time_t*)&time, __TIME__);
+    // set current time - __TIME__
+    set_time_from_string((ds1307_time_t*)&time, "11:22:33");
     ds1307_set_time((ds1307_time_t*)&time);
     PRINT("TIME SET OK\n\r");
 #endif
 
     while(1)
     {
-        invert_led();
-
         // UART echo for testing purposes
         char c = uart_getc();
         if(c)
@@ -215,6 +185,11 @@ int main(void)
             time_dirty = FALSE;
         }
 #endif
+
+        if(time.seconds % 2 == 0)
+            LED1_PORT |= (1 << LED1);
+        else
+            LED1_PORT &= ~(1 << LED1);
     }
 
     return 0;
