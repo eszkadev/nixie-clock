@@ -37,21 +37,25 @@ void setup() {
     // We start by connecting to a WiFi network
     WiFiMulti.addAP(SSID, PASSWORD);
 
-    // Wait for WiFi...
-    while(WiFiMulti.run() != WL_CONNECTED) {
-        digitalWrite(2, HIGH);
-        delay(500);
-    }
-    digitalWrite(2, LOW);
-
     delay(500);
 }
 
 
 void loop() {
+  // Wait for WiFi...
+  while(WiFiMulti.run() != WL_CONNECTED) {
+      digitalWrite(2, HIGH);
+      delay(500);
+  }
+  digitalWrite(2, LOW);
+
   String current_time = getTimeFromDate(getDate());
+  int index_separator = current_time.indexOf(':');
+  int hour = current_time.substring(0, index_separator).toInt();
+  hour++;
+  String correct_time = String(hour) + current_time.substring(index_separator);
   Serial.print('s');
-  Serial.println(current_time);
+  Serial.println(correct_time);
   delay(5000);
 }
 
