@@ -826,4 +826,16 @@ $EndComp
 Connection ~ 10325 2300
 Wire Wire Line
 	10325 2750 10325 3050
+Text Notes 1325 3925 0    60   ~ 0
+NIXIE1
+Text Notes 3325 3925 0    60   ~ 0
+NIXIE2
+Text Notes 5650 3925 0    60   ~ 0
+NIXIE3
+Text Notes 8075 3925 0    60   ~ 0
+NIXIE4
+Text Notes 10675 2725 0    60   ~ 0
+NEON1
+Text Notes 7350 7500 0    60   ~ 12
+Nixie switching
 $EndSCHEMATC
